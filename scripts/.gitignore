@@ -1,1 +1,3 @@
 *.pdf
+*.tex
+__pycache__/

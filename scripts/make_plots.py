@@ -2,45 +2,13 @@ import matplotlib.pyplot
 import pandas
 import argparse
 
-
-def enquote(text, use_tex):
-    if use_tex:
-        return f"``{text}''"
-    else:
-        return f'"{text}"'
-
-
-LABEL_DICT = {
-    "WORK": "Workload",
-    "LEVL": "Level",
-    "ASS1": "Assignment 1",
-    "ASS2": "Assignment 2",
-    "ASS3": "Assignment 3",
-    "ASS4": "Assignment 4",
-    "ILAL": "I learned a lot from the course",
-    "INTC": "The course was intellectually challenging",
-    "CSTR": "The course was clearly structured",
-    "FACT": "Factual knowledge",
-    "FUND": "Fundamental principles",
-    "CURR": "Current theories",
-    "APPL": "To apply subject matter",
-    "PROF": "Professional skills",
-    "TECH": "Technical skills",
-}
+from common import *
 
 PLOT_WIDTH = 3.333
 PLOT_HEIGHT = 1.25
 FIVE_POINT_LIMIT = (0.8, 5.2)
 YEARS_LIMIT = (2016.9, 2023.1)
 YEAR_TICKS = [2017, 2018, 2019, 2020, 2021, 2022, 2023]
-AGREE_DISAGREE_SCALE = [
-    "Firmly Disagree",
-    "Disagree",
-    "Neutral",
-    "Agree",
-    "Firmly Agree",
-]
-RIGHTNESS_SCALE = ["Too Low", "Low", "Just Right", "High", "Too High"]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -87,6 +55,7 @@ if __name__ == "__main__":
 
     total_df = students_df[["year", "n_students"]].dropna()
     resp_df = students_df[["year", "n_resp"]].dropna()
+    pass_df = students_df[["year", "n_pass"]].dropna()
 
     axs.plot(
         total_df["year"],
@@ -97,18 +66,34 @@ if __name__ == "__main__":
         label="Total enrolled",
     )
     axs.plot(
+        pass_df["year"],
+        pass_df["n_pass"].dropna(),
+        marker="x",
+        markersize=3.5,
+        linewidth=1,
+        label="Passing grades",
+    )
+    [line] = axs.plot(
         resp_df["year"],
         resp_df["n_resp"].dropna(),
+        markersize=3.5,
+        linewidth=1,
+        linestyle="--",
+    )
+    axs.plot(
+        students_df["year"],
+        students_df["n_resp"],
         marker="x",
         markersize=3.5,
         linewidth=1,
         label="Evaluation respondents",
+        color=line.get_color(),
     )
 
-    axs.set_ylim(bottom=0)
+    axs.set_ylim(bottom=0, top=40)
     axs.set_xlim(YEARS_LIMIT)
     axs.grid(axis="both")
-    axs.legend()
+    axs.legend(loc="best")
     fig.savefig("n_students.pdf")
 
     metrics_df = pandas.read_csv("../data/metrics.csv").dropna()
@@ -133,7 +118,10 @@ if __name__ == "__main__":
     )
 
     # Make the general outcomes plot
-    ax1.set_title("General statements about the course")
+    if args.tex:
+        ax1.set_title("``The course \ldots{}''")
+    else:
+        ax1.set_title('"The course ..."')
     ax1.set_yticks(
         [1, 2, 3, 4, 5],
         labels=AGREE_DISAGREE_SCALE,
@@ -183,9 +171,9 @@ if __name__ == "__main__":
 
     # Make the assignments plot
     if args.tex:
-        ax3.set_title("``\ldots{} helped me understand the subject matter''")
+        ax3.set_title("``\ldots{} helped me understand the subject''")
     else:
-        ax3.set_title('"... helped me understand the subject matter"')
+        ax3.set_title('"... helped me understand the subject"')
     ax3.set_yticks(
         [1, 2, 3, 4, 5],
         labels=AGREE_DISAGREE_SCALE,
